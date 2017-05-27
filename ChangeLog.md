@@ -1,5 +1,5 @@
-# Revision history for paths
+# Revision history for `paths`
 
-## 0.1  -- YYYY-mm-dd
+## 0.1
 
-* First version. Released on an unsuspecting world.
+* First version. Mostly derived from `hackage-security`'s `Hackage.Security.Util.Path`
