@@ -19,6 +19,11 @@ module System.Path.IO
   , readStrictByteString
   , writeLazyByteString
   , writeStrictByteString
+    -- ** Wrappers around "Data.Text.IO" and "Data.Text.Lazy.IO"
+  , readLazyText
+  , readStrictText
+  , writeLazyText
+  , writeStrictText
     -- ** Wrappers around "System.Directory"
   , copyFile
   , createDirectory
@@ -65,6 +70,10 @@ import           System.Time           (ClockTime (TOD))
 #endif
 import qualified Data.ByteString       as BS
 import qualified Data.ByteString.Lazy  as BS.L
+import qualified Data.Text             as T
+import qualified Data.Text.IO          as T
+import qualified Data.Text.Lazy        as T.L
+import qualified Data.Text.Lazy.IO     as T.L
 import qualified System.Directory      as Dir
 import qualified System.IO             as IO
 
@@ -110,6 +119,30 @@ writeStrictByteString :: FsRoot root => Path root -> BS.ByteString -> IO ()
 writeStrictByteString path bs = do
     filePath <- toAbsoluteFilePath path
     BS.writeFile filePath bs
+
+{-------------------------------------------------------------------------------
+  Wrappers around Data.Text.*
+-------------------------------------------------------------------------------}
+
+readLazyText :: FsRoot root => Path root -> IO T.L.Text
+readLazyText path = do
+    filePath <- toAbsoluteFilePath path
+    T.L.readFile filePath
+
+readStrictText :: FsRoot root => Path root -> IO T.Text
+readStrictText path = do
+    filePath <- toAbsoluteFilePath path
+    T.readFile filePath
+
+writeLazyText :: FsRoot root => Path root -> T.L.Text -> IO ()
+writeLazyText path bs = do
+    filePath <- toAbsoluteFilePath path
+    T.L.writeFile filePath bs
+
+writeStrictText :: FsRoot root => Path root -> T.Text -> IO ()
+writeStrictText path bs = do
+    filePath <- toAbsoluteFilePath path
+    T.writeFile filePath bs
 
 {-------------------------------------------------------------------------------
   Wrappers around System.Directory
