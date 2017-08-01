@@ -100,21 +100,25 @@ openTempFile' path template = do
   Wrappers around Data.ByteString.*
 -------------------------------------------------------------------------------}
 
+-- | Wrapper around lazy 'BS.L.readFile'
 readLazyByteString :: FsRoot root => Path root -> IO BS.L.ByteString
 readLazyByteString path = do
     filePath <- toAbsoluteFilePath path
     BS.L.readFile filePath
 
+-- | Wrapper around strict 'BS.readFile'
 readStrictByteString :: FsRoot root => Path root -> IO BS.ByteString
 readStrictByteString path = do
     filePath <- toAbsoluteFilePath path
     BS.readFile filePath
 
+-- | Wrapper around lazy 'BS.L.writeFile'
 writeLazyByteString :: FsRoot root => Path root -> BS.L.ByteString -> IO ()
 writeLazyByteString path bs = do
     filePath <- toAbsoluteFilePath path
     BS.L.writeFile filePath bs
 
+-- | Wrapper around strict 'BS.writeFile'
 writeStrictByteString :: FsRoot root => Path root -> BS.ByteString -> IO ()
 writeStrictByteString path bs = do
     filePath <- toAbsoluteFilePath path
@@ -124,21 +128,25 @@ writeStrictByteString path bs = do
   Wrappers around Data.Text.*
 -------------------------------------------------------------------------------}
 
+-- | Wrapper around lazy 'T.L.readFile'
 readLazyText :: FsRoot root => Path root -> IO T.L.Text
 readLazyText path = do
     filePath <- toAbsoluteFilePath path
     T.L.readFile filePath
 
+-- | Wrapper around strict 'T.readFile'
 readStrictText :: FsRoot root => Path root -> IO T.Text
 readStrictText path = do
     filePath <- toAbsoluteFilePath path
     T.readFile filePath
 
+-- | Wrapper around lazy 'T.L.writeFile'
 writeLazyText :: FsRoot root => Path root -> T.L.Text -> IO ()
 writeLazyText path bs = do
     filePath <- toAbsoluteFilePath path
     T.L.writeFile filePath bs
 
+-- | Wrapper around strict 'T.writeFile'
 writeStrictText :: FsRoot root => Path root -> T.Text -> IO ()
 writeStrictText path bs = do
     filePath <- toAbsoluteFilePath path
