@@ -7,3 +7,4 @@
 ## 0.1.1
 
 * Add wrappers for `Data.Text(.Lazy).IO` now that `text` is bundled with GHC
+* Add `appendByteString` & `appendLazyByteString` wrappers

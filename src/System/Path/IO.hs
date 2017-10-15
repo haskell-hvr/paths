@@ -19,11 +19,15 @@ module System.Path.IO
   , readStrictByteString
   , writeLazyByteString
   , writeStrictByteString
+  , appendLazyByteString
+  , appendStrictByteString
     -- ** Wrappers around "Data.Text.IO" and "Data.Text.Lazy.IO"
   , readLazyText
   , readStrictText
   , writeLazyText
   , writeStrictText
+  , appendLazyText
+  , appendStrictText
     -- ** Wrappers around "System.Directory"
   , copyFile
   , createDirectory
@@ -124,6 +128,18 @@ writeStrictByteString path bs = do
     filePath <- toAbsoluteFilePath path
     BS.writeFile filePath bs
 
+-- | Wrapper around lazy 'BS.L.appendFile'
+appendLazyByteString :: FsRoot root => Path root -> BS.L.ByteString -> IO ()
+appendLazyByteString path bs = do
+    filePath <- toAbsoluteFilePath path
+    BS.L.appendFile filePath bs
+
+-- | Wrapper around strict 'BS.appendFile'
+appendStrictByteString :: FsRoot root => Path root -> BS.ByteString -> IO ()
+appendStrictByteString path bs = do
+    filePath <- toAbsoluteFilePath path
+    BS.appendFile filePath bs
+
 {-------------------------------------------------------------------------------
   Wrappers around Data.Text.*
 -------------------------------------------------------------------------------}
@@ -151,6 +167,18 @@ writeStrictText :: FsRoot root => Path root -> T.Text -> IO ()
 writeStrictText path bs = do
     filePath <- toAbsoluteFilePath path
     T.writeFile filePath bs
+
+-- | Wrapper around lazy 'T.L.appendFile'
+appendLazyText :: FsRoot root => Path root -> T.L.Text -> IO ()
+appendLazyText path bs = do
+    filePath <- toAbsoluteFilePath path
+    T.L.appendFile filePath bs
+
+-- | Wrapper around strict 'T.appendFile'
+appendStrictText :: FsRoot root => Path root -> T.Text -> IO ()
+appendStrictText path bs = do
+    filePath <- toAbsoluteFilePath path
+    T.appendFile filePath bs
 
 {-------------------------------------------------------------------------------
   Wrappers around System.Directory
