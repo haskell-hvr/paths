@@ -108,10 +108,6 @@ castRoot (Path fp) = Path fp
 takeDirectory :: Path a -> Path a
 takeDirectory = liftFP FP.Posix.takeDirectory
 
--- | Wrapped 'FP.Posix.takeFileName'
-takeFileName :: Path a -> String
-takeFileName = liftFromFP FP.Posix.takeFileName
-
 -- | Wrapped 'FP.Posix.<.>'
 (<.>) :: Path a -> String -> Path a
 fp <.> ext = liftFP (FP.Posix.<.> ext) fp
@@ -137,6 +133,10 @@ data Unrooted
 
 -- instance Pretty (Path Unrooted) where
 --   pretty (Path fp) = fp
+
+-- | Wrapped 'FP.Posix.takeFileName'
+takeFileName :: Path a -> Path Unrooted
+takeFileName = liftFP FP.Posix.takeFileName
 
 -- | Wrapped 'FP.Posix.</>'
 (</>) :: Path a -> Path Unrooted -> Path a
@@ -330,8 +330,8 @@ liftFP f (Path fp) = Path (f fp)
 liftFP2 :: (FilePath -> FilePath -> FilePath) -> Path a -> Path b -> Path c
 liftFP2 f (Path fp) (Path fp') = Path (f fp fp')
 
-liftFromFP :: (FilePath -> x) -> Path a -> x
-liftFromFP f (Path fp) = f fp
+-- liftFromFP :: (FilePath -> x) -> Path a -> x
+-- liftFromFP f (Path fp) = f fp
 
 -- liftFromFP2 :: (FilePath -> FilePath -> x) -> Path a -> Path b -> x
 -- liftFromFP2 f (Path fp) (Path fp') = f fp fp'
