@@ -10,6 +10,7 @@
 module System.Path (
     -- * Paths
     Path(..)
+  , FileExt(..)
   , castRoot
     -- * FilePath-like operations on paths with arbitrary roots
   , takeDirectory
@@ -83,6 +84,15 @@ newtype Path a = Path FilePath -- always a Posix style path internally
 instance NFData (Path a) where
     rnf (Path p) = rnf p
 
+-- | Type to represent filepath extensions.
+--
+-- File extensions are usually a high-level convention and in most
+-- cases the low-level filesystem layer is agnostic to them.
+--
+-- @since 0.2.0.0
+newtype FileExt = FileExt String
+                deriving (Show, Eq, Ord)
+
 mkPathNative :: FilePath -> Path a
 mkPathNative = Path . FP.Posix.joinPath . FP.Native.splitDirectories
 
@@ -110,18 +120,18 @@ takeDirectory :: Path a -> Path a
 takeDirectory = liftFP FP.Posix.takeDirectory
 
 -- | Wrapped 'FP.Posix.<.>'
-(<.>) :: Path a -> String -> Path a
-fp <.> ext = liftFP (FP.Posix.<.> ext) fp
+(<.>) :: Path a -> FileExt -> Path a
+fp <.> (FileExt ext) = liftFP (FP.Posix.<.> ext) fp
 
 -- | Wrapped 'FP.Posix.splitExtension'
-splitExtension :: Path a -> (Path a, String)
-splitExtension (Path fp) = (Path fp', ext)
+splitExtension :: Path a -> (Path a, FileExt)
+splitExtension (Path fp) = (Path fp', FileExt ext)
   where
     (fp', ext) = FP.Posix.splitExtension fp
 
 -- | Wrapped 'FP.Posix.takeExtension'
-takeExtension :: Path a -> String
-takeExtension (Path fp) = FP.Posix.takeExtension fp
+takeExtension :: Path a -> FileExt
+takeExtension (Path fp) = FileExt (FP.Posix.takeExtension fp)
 
 {-------------------------------------------------------------------------------
   Unrooted paths
