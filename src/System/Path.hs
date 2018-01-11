@@ -14,6 +14,7 @@ module System.Path (
     -- * FilePath-like operations on paths with arbitrary roots
   , takeDirectory
   , takeFileName
+  , takeBaseName
   , (<.>)
   , splitExtension
   , takeExtension
@@ -137,6 +138,12 @@ data Unrooted
 -- | Wrapped 'FP.Posix.takeFileName'
 takeFileName :: Path a -> Path Unrooted
 takeFileName = liftFP FP.Posix.takeFileName
+
+-- | Wrapped 'FP.Posix.takeBaseName'
+--
+-- @since 0.2.0.0
+takeBaseName :: Path a -> Path Unrooted
+takeBaseName = fst . splitExtension . takeFileName
 
 -- | Wrapped 'FP.Posix.</>'
 (</>) :: Path a -> Path Unrooted -> Path a
