@@ -33,13 +33,18 @@ l <.>~ n = overSafe l (<.> n)
 ----------------------------------------------------------------------------
 
 basename :: Lens' (Path a) (Path Unrooted)
-basename f p = (<.> takeExtension p) . (takeDirectory p </>) Fun.<$> f (takeBaseName p)
+basename f p = (<.?> takeExtension p) . (takeDirectory p </>) Fun.<$> f (takeBaseName p)
+
+-- local helper
+(<.?>) :: Path a -> Maybe FileExt -> Path a
+fp <.?> Nothing = fp
+fp <.?> Just fe = fp <.> fe
 
 directory :: Lens' (Path a) (Path a)
 directory f p = (</> takeFileName p) <$> f (takeDirectory p)
 
-extension :: Lens' (Path a) FileExt
-extension f p = (n <.>) <$> f e
+extension :: Lens' (Path a) (Maybe FileExt)
+extension f p = (n <.?>) <$> f e
   where
     (n, e) = splitExtension p
 

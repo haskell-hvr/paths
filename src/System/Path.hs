@@ -121,17 +121,23 @@ takeDirectory = liftFP FP.Posix.takeDirectory
 
 -- | Wrapped 'FP.Posix.<.>'
 (<.>) :: Path a -> FileExt -> Path a
-fp <.> (FileExt ext) = liftFP (FP.Posix.<.> ext) fp
+fp <.> (FileExt ext) = liftFP (FP.Posix.<.> ('.':ext)) fp
 
 -- | Wrapped 'FP.Posix.splitExtension'
-splitExtension :: Path a -> (Path a, FileExt)
-splitExtension (Path fp) = (Path fp', FileExt ext)
-  where
-    (fp', ext) = FP.Posix.splitExtension fp
+splitExtension :: Path a -> (Path a, Maybe FileExt)
+splitExtension (Path fp)
+  = case FP.Posix.splitExtension fp of
+      (fp', "") -> (Path fp', Nothing)
+      (fp', '.':ext) -> (Path fp', Just (FileExt ext))
+      _ -> error "System.Path.splitExtension: the impossible happened"
 
 -- | Wrapped 'FP.Posix.takeExtension'
-takeExtension :: Path a -> FileExt
-takeExtension (Path fp) = FileExt (FP.Posix.takeExtension fp)
+takeExtension :: Path a -> Maybe FileExt
+takeExtension (Path fp)
+  = case FP.Posix.takeExtension fp of
+      ""      -> Nothing
+      '.':ext -> Just (FileExt ext)
+      _       -> error "System.Path.takeExtension: the impossible happened"
 
 {-------------------------------------------------------------------------------
   Unrooted paths
