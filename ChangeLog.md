@@ -7,6 +7,7 @@
 * Add `appendByteString` & `appendLazyByteString` wrappers
 * Add `{has,drop,add}TrailingPathSeparator` operations
 * Change types of `joinFragments` and `splitFragments`, and add new 'fragments` smart-constructor.
+* Add new `System.Path.QQ` module providing QuasiQuoters
 
 ## 0.1
 
