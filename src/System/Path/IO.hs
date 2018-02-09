@@ -300,10 +300,10 @@ getTemporaryDirectory = fromAbsoluteFilePath <$> Dir.getTemporaryDirectory
 getDirectoryContents :: FsRoot root => Path root -> IO [Path Unrooted]
 getDirectoryContents path = do
     filePath <- toAbsoluteFilePath path
-    fragments <$> Dir.getDirectoryContents filePath
+    fragments' <$> Dir.getDirectoryContents filePath
   where
-    fragments :: [String] -> [Path Unrooted]
-    fragments = map fragment . filter (not . skip)
+    fragments' :: [String] -> [Path Unrooted]
+    fragments' = map fragment . filter (not . skip)
 
     skip :: String -> Bool
     skip "."  = True

@@ -241,9 +241,9 @@ splitFragments (Path fp) = map Path (FP.Posix.splitDirectories fp)
   File-system paths
 -------------------------------------------------------------------------------}
 
-data Relative
-data Absolute
-data HomeDir
+data Relative -- ^ 'Path' tag for paths /rooted/ at CWD
+data Absolute -- ^ 'Path' tag for absolute paths
+data HomeDir  -- ^ 'Path' tag for paths /rooted/ at @$HOME@
 
 -- instance Pretty (Path Absolute) where
 --   pretty (Path fp) = fp
@@ -297,9 +297,6 @@ instance NFData FsPath where
   Conversions
 -------------------------------------------------------------------------------}
 
-toFilePath :: Path Absolute -> FilePath
-toFilePath = unPathNative
-
 fromFilePath :: FilePath -> FsPath
 fromFilePath fp
     | FP.Native.isAbsolute fp = FsPath (mkPathNative fp  :: Path Absolute)
@@ -317,6 +314,18 @@ fromFilePath fp
 makeAbsolute :: FsPath -> IO (Path Absolute)
 makeAbsolute (FsPath p) = mkPathNative <$> toAbsoluteFilePath p
 
+-- | Export absolute path to a native 'FilePath'.
+--
+-- This is the inverse to 'fromAbsoluteFilePath'.
+--
+toFilePath :: Path Absolute -> FilePath
+toFilePath = unPathNative
+
+-- | Construct 'Absolute' path from a native 'FilePath'.
+--
+-- This is the inverse to 'toFilePath'.
+--
+-- __NOTE__: If the argument is not an absolute path this function will throw an 'error'.
 fromAbsoluteFilePath :: FilePath -> Path Absolute
 fromAbsoluteFilePath fp
   | FP.Native.isAbsolute fp = mkPathNative fp
