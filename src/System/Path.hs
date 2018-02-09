@@ -9,7 +9,7 @@
 -- wrappers around common 'IO' operations.
 module System.Path (
     -- * Paths
-    Path(..)
+    Path
   , FileExt(..)
   , castRoot
     -- * FilePath-like operations on paths with arbitrary roots
@@ -70,7 +70,7 @@ import qualified System.FilePath.Posix as FP.Posix
 
 -- | Paths
 --
--- A 'Path' is simply a 'FilePath' with a type-level tag indicating where this
+-- A 'Path' is a wrapped 'FilePath' with a type-level tag indicating where this
 -- path is rooted (relative to the current directory, absolute path, relative to
 -- a web domain, whatever). Most operations on 'Path' are just lifted versions
 -- of the operations on the underlying 'FilePath'. The tag however allows us to
