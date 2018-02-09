@@ -29,6 +29,7 @@ module System.Path (
   , toUnrootedFilePath
   , fromUnrootedFilePath
   , fragment
+  , fragments
   , joinFragments
   , splitFragments
 --  , isPathPrefixOf
