@@ -6,6 +6,7 @@
 * Add wrappers for `Data.Text(.Lazy).IO` now that `text` is bundled with GHC
 * Add `appendByteString` & `appendLazyByteString` wrappers
 * Add `{has,drop,add}TrailingPathSeparator` operations
+* Change types of `joinFragments` and `splitFragments`, and add new 'fragments` smart-constructor.
 
 ## 0.1
 

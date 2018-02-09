@@ -24,6 +24,7 @@ module System.Path.Internal (
   , toUnrootedFilePath
   , fromUnrootedFilePath
   , fragment
+  , fragments
   , joinFragments
   , splitFragments
 --  , isPathPrefixOf
@@ -209,13 +210,26 @@ fromUnrootedFilePath = mkPathPosix . FP.Posix.dropDrive
 fragment :: String -> Path Unrooted
 fragment = Path . FP.Posix.dropDrive
 
+-- | Version of 'fragment' taking a list of fragments
+--
+-- __NOTE__: If any argument would be considered an absolute POSIX style
+-- FilePath, it's automatically converted to a relative FilePath.
+--
+-- @since 0.2.0.0
+fragments :: [String] -> Path Unrooted
+fragments = liftToFP (FP.Posix.joinPath . map FP.Posix.dropDrive)
+
 -- | Wrapped 'FP.Posix.joinPath'
-joinFragments :: [String] -> Path Unrooted
-joinFragments = liftToFP (FP.Posix.joinPath . map FP.Posix.dropDrive)
+--
+-- @since 0.2.0.0
+joinFragments :: [Path Unrooted] -> Path Unrooted
+joinFragments fs = Path (FP.Posix.joinPath [ f | Path f <- fs ])
 
 -- | Wrapped 'FP.Posix.splitDirectories'
-splitFragments :: Path Unrooted -> [String]
-splitFragments (Path fp) = FP.Posix.splitDirectories fp
+--
+-- @since 0.2.0.0
+splitFragments :: Path Unrooted -> [Path Unrooted]
+splitFragments (Path fp) = map Path (FP.Posix.splitDirectories fp)
 
 -- FIXME
 -- isPathPrefixOf :: Path Unrooted -> Path Unrooted -> Bool
