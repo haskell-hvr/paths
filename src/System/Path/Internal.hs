@@ -62,6 +62,8 @@ import qualified System.Directory      as Dir
 import qualified System.FilePath       as FP.Native
 import qualified System.FilePath.Posix as FP.Posix
 
+import           System.Path.Native    (posixFromNative, posixToNative)
+
 {-------------------------------------------------------------------------------
   Paths
 -------------------------------------------------------------------------------}
@@ -92,10 +94,10 @@ newtype FileExt = FileExt String
                 deriving (Show, Eq, Ord)
 
 mkPathNative :: FilePath -> Path a
-mkPathNative = Path . FP.Posix.joinPath . FP.Native.splitDirectories
+mkPathNative = Path . posixFromNative
 
 unPathNative :: Path a -> FilePath
-unPathNative (Path fp) = FP.Native.joinPath . FP.Posix.splitDirectories $ fp
+unPathNative (Path fp) = posixToNative fp
 
 mkPathPosix :: FilePath -> Path a
 mkPathPosix = Path

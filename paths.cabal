@@ -33,6 +33,7 @@ library
                        System.Path.IO
                        System.Path.Unsafe
   other-modules:       System.Path.Internal
+                       System.Path.Native
 
   default-language:    Haskell2010
   other-extensions:    CPP
