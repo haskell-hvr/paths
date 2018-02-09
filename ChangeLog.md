@@ -2,9 +2,10 @@
 
 ## 0.2
 
-* Make `Path` opaque
+* Make `Path` abstract by default and move type-unsafe operations into new `System.Path.Unsafe` module
 * Add wrappers for `Data.Text(.Lazy).IO` now that `text` is bundled with GHC
 * Add `appendByteString` & `appendLazyByteString` wrappers
+* Add `{has,drop,add}TrailingPathSeparator` operations
 
 ## 0.1
 
