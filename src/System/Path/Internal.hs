@@ -63,7 +63,7 @@ import qualified System.FilePath             as FP.Native
 import qualified System.FilePath.Posix       as FP.Posix
 
 import           System.Path.Internal.Compat
-import           System.Path.Native          (posixFromNative, posixToNative)
+import           System.Path.Internal.Native
 
 {-------------------------------------------------------------------------------
   Paths

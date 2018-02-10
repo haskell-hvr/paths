@@ -1,6 +1,9 @@
 {-# LANGUAGE CPP #-}
 
-module System.Path.Native where
+module System.Path.Internal.Native
+    ( posixToNative
+    , posixFromNative
+    ) where
 
 import qualified System.FilePath       as FP.Native
 import qualified System.FilePath.Posix as FP.Posix
