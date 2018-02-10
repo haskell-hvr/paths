@@ -34,6 +34,7 @@ module System.Path.Internal (
     -- * File-system paths
   , FsRoot(..)
   , FsPath(..)
+  , CWD
   , Relative
   , Absolute
   , HomeDir
@@ -268,14 +269,23 @@ splitFragments (Path fp) = map Path (FP.Posix.splitDirectories fp)
   File-system paths
 -------------------------------------------------------------------------------}
 
-data Relative -- ^ 'Path' tag for paths /rooted/ at CWD
+-- | Compatibility type-synonym
+type Relative = CWD
+{-# DEPRECATED Relative "Please use 'CWD' instead" #-}
+
+-- | 'Path' tag for paths /rooted/ at the /current working directory/
+--
+-- @since 0.2.0.0
+data CWD
+
 data Absolute -- ^ 'Path' tag for absolute paths
+
 data HomeDir  -- ^ 'Path' tag for paths /rooted/ at @$HOME@
 
 -- instance Pretty (Path Absolute) where
 --   pretty (Path fp) = fp
 
--- instance Pretty (Path Relative) where
+-- instance Pretty (Path CWD) where
 --   pretty (Path fp) = "./" ++ fp
 
 -- instance Pretty (Path HomeDir) where
@@ -287,7 +297,7 @@ class FsRoot root where
   --
   toAbsoluteFilePath :: Path root -> IO FilePath
 
-instance FsRoot Relative where
+instance FsRoot CWD where
     toAbsoluteFilePath p = go (unPathNative p)
       where
         go :: FilePath -> IO FilePath
@@ -328,7 +338,7 @@ fromFilePath :: FilePath -> FsPath
 fromFilePath fp
     | FP.Native.isAbsolute fp = FsPath (mkPathNative fp  :: Path Absolute)
     | Just fp' <- atHome fp   = FsPath (mkPathNative fp' :: Path HomeDir)
-    | otherwise               = FsPath (mkPathNative fp  :: Path Relative)
+    | otherwise               = FsPath (mkPathNative fp  :: Path CWD)
   where
     -- TODO: I don't know if there a standard way that Windows users refer to
     -- their home directory. For now, we'll only interpret '~'. Everybody else

@@ -43,6 +43,7 @@ module System.Path (
     -- * File-system paths
   , FsRoot(..)
   , FsPath(..)
+  , CWD
   , Relative
   , Absolute
   , HomeDir

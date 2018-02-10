@@ -30,7 +30,7 @@ import           System.Path.Internal
 --
 --  * 'Path' 'Absolute'
 --  * 'Path' 'HomeDir'
---  * 'Path' 'Relative'
+--  * 'Path' 'CWD'
 --
 -- depending on the path literal given.
 --
@@ -42,7 +42,7 @@ qfspath :: FilePath -> Q Exp
 qfspath fp
   | FP.Posix.isAbsolute fp  = qPath fp  [t|Absolute|]
   | Just fp' <- atHome fp   = qPath fp' [t|HomeDir|]
-  | otherwise               = qPath fp  [t|Relative|]
+  | otherwise               = qPath fp  [t|CWD|]
   where
     atHome :: FilePath -> Maybe FilePath
     atHome "~"           = Just ""
