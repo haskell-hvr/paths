@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP                       #-}
 {-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE Safe                      #-}
 
@@ -57,16 +56,14 @@ module System.Path.Internal (
 -}
   ) where
 
-#if !MIN_VERSION_base(4,8,0)
-import           Control.Applicative   ((<$>))
-#endif
-import           Control.DeepSeq       (NFData (rnf))
+import           Control.DeepSeq             (NFData (rnf))
 -- import Data.List (isPrefixOf)
-import qualified System.Directory      as Dir
-import qualified System.FilePath       as FP.Native
-import qualified System.FilePath.Posix as FP.Posix
+import qualified System.Directory            as Dir
+import qualified System.FilePath             as FP.Native
+import qualified System.FilePath.Posix       as FP.Posix
 
-import           System.Path.Native    (posixFromNative, posixToNative)
+import           System.Path.Internal.Compat
+import           System.Path.Native          (posixFromNative, posixToNative)
 
 {-------------------------------------------------------------------------------
   Paths
@@ -298,21 +295,7 @@ class FsRoot root where
   toAbsoluteFilePath :: Path root -> IO FilePath
 
 instance FsRoot CWD where
-    toAbsoluteFilePath p = go (unPathNative p)
-      where
-        go :: FilePath -> IO FilePath
-#if MIN_VERSION_directory(1,2,2)
-        go = Dir.makeAbsolute
-#else
-        -- copied implementation from the directory package
-        go = (FP.Native.normalise <$>) . absolutize
-        absolutize path -- avoid the call to `getCurrentDirectory` if we can
-          | FP.Native.isRelative path
-                      = (FP.Native.</> path)
-                      . FP.Native.addTrailingPathSeparator <$>
-                        Dir.getCurrentDirectory
-          | otherwise = return path
-#endif
+    toAbsoluteFilePath p = dirMakeAbsolute (unPathNative p)
 
 instance FsRoot Absolute where
     toAbsoluteFilePath = return . unPathNative
