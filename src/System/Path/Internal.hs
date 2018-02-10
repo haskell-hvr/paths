@@ -10,7 +10,10 @@ module System.Path.Internal (
   , takeDirectory
   , takeFileName
   , takeBaseName
+  , normalise
+
   , (<.>)
+  , (-<.>)
   , splitExtension
   , takeExtension
     -- ** Trailing slash functions
@@ -84,15 +87,6 @@ newtype Path a = Path FilePath -- always a Posix style path internally
 instance NFData (Path a) where
     rnf (Path p) = rnf p
 
--- | Type to represent filepath extensions.
---
--- File extensions are usually a high-level convention and in most
--- cases the low-level filesystem layer is agnostic to them.
---
--- @since 0.2.0.0
-newtype FileExt = FileExt String
-                deriving (Show, Eq, Ord)
-
 mkPathNative :: FilePath -> Path a
 mkPathNative = Path . posixFromNative
 
@@ -109,13 +103,27 @@ unPathPosix (Path fp) = fp
   FilePath-like operations on paths with an arbitrary root
 -------------------------------------------------------------------------------}
 
--- | Wrapped 'FP.Posix.takeDirectory'
-takeDirectory :: Path a -> Path a
-takeDirectory = liftFP FP.Posix.takeDirectory
+----------------------------------------------------------------------------
+-- file extensions
+
+-- | Type to represent filepath extensions.
+--
+-- File extensions are usually a high-level convention and in most
+-- cases the low-level filesystem layer is agnostic to them.
+--
+-- @since 0.2.0.0
+newtype FileExt = FileExt String
+                deriving (Show, Eq, Ord)
 
 -- | Wrapped 'FP.Posix.<.>'
 (<.>) :: Path a -> FileExt -> Path a
 fp <.> (FileExt ext) = liftFP (FP.Posix.<.> ('.':ext)) fp
+
+-- | Wrapped 'FP.Posix.-<.>'
+--
+-- @since 0.2.0.0
+(-<.>) :: Path a -> FileExt -> Path a
+fp -<.> (FileExt ext) = liftFP (FP.Posix.-<.> ('.':ext)) fp
 
 -- | Wrapped 'FP.Posix.splitExtension'
 splitExtension :: Path a -> (Path a, Maybe FileExt)
@@ -132,6 +140,21 @@ takeExtension (Path fp)
       ""      -> Nothing
       '.':ext -> Just (FileExt ext)
       _       -> error "System.Path.takeExtension: the impossible happened"
+
+----------------------------------------------------------------------------
+
+-- | Wrapped 'FP.Posix.takeDirectory'
+--
+takeDirectory :: Path a -> Path a
+takeDirectory = liftFP FP.Posix.takeDirectory
+
+-- | Normalise 'Path' according to POSIX rules.
+--
+-- See documentation of 'FP.Posix.normalise' for details.
+--
+-- @since 0.2.0.0
+normalise :: Path a -> Path a
+normalise = liftFP FP.Posix.normalise
 
 {-------------------------------------------------------------------------------
   Unrooted paths
@@ -155,12 +178,16 @@ takeFileName = liftFP FP.Posix.takeFileName
 takeBaseName :: Path a -> Path Unrooted
 takeBaseName = fst . splitExtension . takeFileName
 
+-- NB: we don't wrap splitFileName for now, as confusingly,
+-- 'takeDirectory' is not the same as 'fst . splitFileName'
+
 -- | Wrapped 'FP.Posix.</>'
 --
 -- The empty fragment @fragment ""@ acts as the right-identity
 --
 -- @root </> 'fragment' "" == root@
 --
+-- This is the inverse to 'splitFileName'.
 (</>) :: Path a -> Path Unrooted -> Path a
 (</>) = liftFP2 (FP.Posix.</>)
 

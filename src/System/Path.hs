@@ -10,18 +10,23 @@
 module System.Path (
     -- * Paths
     Path
-  , FileExt(..)
     -- * FilePath-like operations on paths with arbitrary roots
   , takeDirectory
   , takeFileName
-  , takeBaseName
+
+    -- ** Operations aware of file-extensions
+  , FileExt(..)
   , (<.>)
+  , (-<.>)
   , splitExtension
   , takeExtension
+  , takeBaseName
+
     -- ** Trailing slash functions
   , hasTrailingPathSeparator
   , addTrailingPathSeparator
   , dropTrailingPathSeparator
+
     -- * Unrooted paths
   , Unrooted
   , (</>)
@@ -32,13 +37,16 @@ module System.Path (
   , fragments
   , joinFragments
   , splitFragments
+  , normalise
 --  , isPathPrefixOf
+
     -- * File-system paths
   , FsRoot(..)
   , FsPath(..)
   , Relative
   , Absolute
   , HomeDir
+
     -- ** Conversions
   , toFilePath
   , fromFilePath
