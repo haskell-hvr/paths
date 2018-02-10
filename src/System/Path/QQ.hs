@@ -32,7 +32,7 @@ import           System.Path.Internal
 --  * 'Path' 'HomeDir'
 --  * 'Path' 'CWD'
 --
--- depending on the path literal given.
+-- depending on the POSIX-style path literal given.
 --
 -- @since 0.2.0.0
 fspath :: QQ.QuasiQuoter
@@ -50,7 +50,7 @@ qfspath fp
     atHome _otherwise    = Nothing
 
 
--- | Quasiquoter for constructing 'Path' 'Unrooted' from POSIX path literals.
+-- | Quasiquoter for constructing 'Path' 'Unrooted' from POSIX-style path literals.
 --
 -- @since 0.2.0.0
 unrooted :: QQ.QuasiQuoter

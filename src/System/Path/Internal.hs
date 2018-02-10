@@ -314,9 +314,11 @@ type Relative = CWD
 -- @since 0.2.0.0
 data CWD
 
-data Absolute -- ^ 'Path' tag for absolute paths
+-- | 'Path' tag for absolute paths
+data Absolute
 
-data HomeDir  -- ^ 'Path' tag for paths /rooted/ at @$HOME@
+-- | 'Path' tag for paths /rooted/ at @$HOME@
+data HomeDir
 
 -- instance Pretty (Path Absolute) where
 --   pretty (Path fp) = fp
@@ -329,8 +331,12 @@ data HomeDir  -- ^ 'Path' tag for paths /rooted/ at @$HOME@
 
 -- | A file system root can be interpreted as an (absolute) FilePath
 class FsRoot root where
-  -- | Convert a Path to an absolute FilePath (using native style directory separators).
+  -- | Convert a Path to an absolute native FilePath (using native style directory separators).
   --
+  -- This operation needs to be in 'IO' for resolving paths with
+  -- dynamic roots, such as 'CWD' or 'HomeDir'.
+  --
+  -- See also 'makeAbsolute'
   toAbsoluteFilePath :: Path root -> IO FilePath
 
 instance FsRoot CWD where
@@ -346,7 +352,7 @@ instance FsRoot HomeDir where
 
 -- | Abstract over a file system root
 --
--- see 'fromFilePath'
+-- 'FsPath' can be constructed directly or via 'fromFilePath' or 'System.Path.QQ.fspath'.
 data FsPath = forall root. FsRoot root => FsPath (Path root)
 
 instance NFData FsPath where
@@ -356,6 +362,11 @@ instance NFData FsPath where
   Conversions
 -------------------------------------------------------------------------------}
 
+-- | Construct a 'FsPath' from a native 'FilePath'.
+--
+-- __NOTE__: Native 'FilePath's whose first path component is a @~@
+-- (and not preceded by anything else) are interpreted to be relative
+-- to @$HOME@ (even on non-POSIX systems).
 fromFilePath :: FilePath -> FsPath
 fromFilePath fp
     | FP.Native.isAbsolute fp = FsPath (mkPathNative fp  :: Path Absolute)
@@ -370,6 +381,9 @@ fromFilePath fp
     atHome ('~':sep:fp') | FP.Native.isPathSeparator sep = Just fp'
     atHome _otherwise    = Nothing
 
+-- | Export filesystem path to an absolute 'Path'
+--
+-- See also 'toAbsoluteFilePath'
 makeAbsolute :: FsPath -> IO (Path Absolute)
 makeAbsolute (FsPath p) = mkPathNative <$> toAbsoluteFilePath p
 
