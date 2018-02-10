@@ -14,7 +14,12 @@ module System.Path.Internal (
   , (<.>)
   , (-<.>)
   , splitExtension
+  , splitExtensions
   , takeExtension
+  , takeExtensions
+  , stripExtension
+  , isExtensionOf
+
     -- ** Trailing slash functions
   , hasTrailingPathSeparator
   , addTrailingPathSeparator
@@ -138,6 +143,40 @@ takeExtension (Path fp)
       ""      -> Nothing
       '.':ext -> Just (FileExt ext)
       _       -> error "System.Path.takeExtension: the impossible happened"
+
+
+-- | Wrapped 'FP.Posix.splitExtensions'
+--
+-- @since 0.2.0.0
+splitExtensions :: Path a -> (Path a, Maybe FileExt)
+splitExtensions (Path fp)
+  = case FP.Posix.splitExtensions fp of
+      (fp', "") -> (Path fp', Nothing)
+      (fp', '.':ext) -> (Path fp', Just (FileExt ext))
+      _ -> error "System.Path.splitExtension: the impossible happened"
+
+-- | Wrapped 'FP.Posix.takeExtensions'
+--
+-- @since 0.2.0.0
+takeExtensions :: Path a -> Maybe FileExt
+takeExtensions (Path fp)
+  = case FP.Posix.takeExtension fp of
+      ""      -> Nothing
+      '.':ext -> Just (FileExt ext)
+      _       -> error "System.Path.takeExtension: the impossible happened"
+
+
+-- | Wrapped 'FP.Posix.stripExtension'
+--
+-- @since 0.2.0.0
+stripExtension :: FileExt -> Path a -> Maybe (Path a)
+stripExtension (FileExt ext) (Path fp) = fmap Path (FP.Posix.stripExtension ext fp)
+
+-- | Wrapped 'FP.Posix.isExtensionOf'
+--
+-- @since 0.2.0.0
+isExtensionOf :: FileExt -> Path a -> Bool
+isExtensionOf (FileExt ext) (Path fp) = posixIsExtensionOf ext fp
 
 ----------------------------------------------------------------------------
 

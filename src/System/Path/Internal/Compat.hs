@@ -1,20 +1,21 @@
 {-# LANGUAGE CPP  #-}
 {-# LANGUAGE Safe #-}
 
+{-# OPTIONS_GHC -fno-warn-unused-imports #-}
+
 -- compat layer
 module System.Path.Internal.Compat
     ( Applicative(..)
     , (<$>)
     , dirMakeAbsolute
+    , posixIsExtensionOf
     ) where
 
-#if !MIN_VERSION_base(4,8,0)
 import           Control.Applicative
-#endif
-import qualified System.Directory    as Dir
-#if !MIN_VERSION_directory(1,2,2)
-import qualified System.FilePath     as FP.Native
-#endif
+import           Data.List             (isSuffixOf)
+import qualified System.Directory      as Dir
+import qualified System.FilePath       as FP.Native
+import qualified System.FilePath.Posix as FP.Posix
 
 dirMakeAbsolute :: FilePath -> IO FilePath
 #if MIN_VERSION_directory(1,2,2)
@@ -29,4 +30,13 @@ dirMakeAbsolute = (FP.Native.normalise <$>) . absolutize
                   . FP.Native.addTrailingPathSeparator <$>
                     Dir.getCurrentDirectory
       | otherwise = return path
+#endif
+
+
+posixIsExtensionOf :: String -> FilePath -> Bool
+#if MIN_VERSION_filepath(1,4,2)
+posixIsExtensionOf = FP.Posix.isExtensionOf
+#else
+posixIsExtensionOf ext@('.':_) = isSuffixOf ext . FP.Posix.takeExtensions
+posixIsExtensionOf ext         = isSuffixOf ('.':ext) . FP.Posix.takeExtensions
 #endif

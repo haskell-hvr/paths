@@ -19,8 +19,12 @@ module System.Path (
   , (<.>)
   , (-<.>)
   , splitExtension
+  , splitExtensions
   , takeExtension
+  , takeExtensions
   , takeBaseName
+  , stripExtension
+  , isExtensionOf
 
     -- ** Trailing slash functions
   , hasTrailingPathSeparator
