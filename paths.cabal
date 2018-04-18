@@ -1,6 +1,6 @@
 cabal-version:       1.12
 name:                paths
-version:             0.2
+version:             0.2.0.0
 
 synopsis:            Library for representing and manipulating type-safe file paths
 description:         This library provides a more type-safe version of 'FilePath's together with thin wrappers around common IO operations.

@@ -1,13 +1,18 @@
 # Revision history for `paths`
 
-## 0.2
+## 0.2.0.0
 
 * Make `Path` abstract by default and move type-unsafe operations into new `System.Path.Unsafe` module
 * Add wrappers for `Data.Text(.Lazy).IO` now that `text` is bundled with GHC
 * Add `appendByteString` & `appendLazyByteString` wrappers
 * Add `{has,drop,add}TrailingPathSeparator` operations
-* Change types of `joinFragments` and `splitFragments`, and add new 'fragments` smart-constructor.
+* Add new `takeBaseName` and `normalise` operations
+* Introduce `FileExt` type for representing file extensions in the API and add more file-extension related operations.
+* Change types of `joinFragments` and `splitFragments`, and add new `fragments` smart-constructor
+* Change type-signature of `takeFileName`
 * Add new `System.Path.QQ` module providing QuasiQuoters
+* Add new `System.Path.Lens` module
+* Rename `Relative` to `CWD`
 
 ## 0.1
 
