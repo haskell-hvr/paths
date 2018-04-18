@@ -62,7 +62,7 @@ module System.Path.Internal (
   ) where
 
 import           Control.DeepSeq             (NFData (rnf))
--- import Data.List (isPrefixOf)
+import           Data.List                   (stripPrefix)
 import qualified System.Directory            as Dir
 import qualified System.FilePath             as FP.Native
 import qualified System.FilePath.Posix       as FP.Posix
@@ -118,6 +118,8 @@ unPathPosix (Path fp) = fp
 newtype FileExt = FileExt String
                 deriving (Show, Eq, Ord)
 
+infixr 7  <.>, -<.>
+
 -- | Wrapped 'FP.Posix.<.>'
 (<.>) :: Path a -> FileExt -> Path a
 fp <.> (FileExt ext) = liftFP (FP.Posix.<.> ('.':ext)) fp
@@ -126,7 +128,7 @@ fp <.> (FileExt ext) = liftFP (FP.Posix.<.> ('.':ext)) fp
 --
 -- @since 0.2.0.0
 (-<.>) :: Path a -> FileExt -> Path a
-fp -<.> (FileExt ext) = liftFP (FP.Posix.-<.> ('.':ext)) fp
+fp -<.> (FileExt ext) = liftFP (flip FP.Posix.replaceExtension ('.':ext)) fp
 
 -- | Wrapped 'FP.Posix.splitExtension'
 splitExtension :: Path a -> (Path a, Maybe FileExt)
@@ -170,7 +172,12 @@ takeExtensions (Path fp)
 --
 -- @since 0.2.0.0
 stripExtension :: FileExt -> Path a -> Maybe (Path a)
-stripExtension (FileExt ext) (Path fp) = fmap Path (FP.Posix.stripExtension ext fp)
+stripExtension (FileExt ext) (Path fp) = fmap Path (stripExtension' ext fp)
+  where
+    stripExtension' []         path = Just path
+    stripExtension' ext'@(x:_) path = stripSuffix (if FP.Posix.isExtSeparator x then ext' else '.':ext') path
+      where
+        stripSuffix xs ys = reverse <$> stripPrefix (reverse xs) (reverse ys)
 
 -- | Wrapped 'FP.Posix.isExtensionOf'
 --
@@ -217,6 +224,8 @@ takeBaseName = fst . splitExtension . takeFileName
 
 -- NB: we don't wrap splitFileName for now, as confusingly,
 -- 'takeDirectory' is not the same as 'fst . splitFileName'
+
+infixr 5 </>
 
 -- | Wrapped 'FP.Posix.</>'
 --

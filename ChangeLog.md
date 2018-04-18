@@ -13,6 +13,7 @@
 * Add new `System.Path.QQ` module providing QuasiQuoters
 * Add new `System.Path.Lens` module
 * Rename `Relative` to `CWD`
+* Synchronize operator fixities of `<.>`, `-<.>` and `</>` to match the ones from the `filepath` library
 
 ## 0.1
 
