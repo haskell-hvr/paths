@@ -53,7 +53,7 @@ module System.Path.Internal (
     -- ** Conversions
   , toFilePath
   , fromFilePath
-  , makeAbsolute
+  , MakeAbsolute (..)
   , fromAbsoluteFilePath
 {-
     -- * Wrappers around Codec.Archive.Tar
@@ -471,11 +471,17 @@ fromFilePath fp
     atHome ('~':sep:fp') | FP.Native.isPathSeparator sep = Just fp'
     atHome _otherwise    = Nothing
 
--- | Export filesystem path to an absolute 'Path'
---
--- See also 'toAbsoluteFilePath'
-makeAbsolute :: FsPath -> IO (Path Absolute)
-makeAbsolute (FsPath p) = mkPathNative <$> toAbsoluteFilePath p
+class MakeAbsolute path where
+    -- | Export some path to an absolute 'Path'
+    --
+    -- See also 'toAbsoluteFilePath'
+    makeAbsolute :: path -> IO (Path Absolute)
+
+instance MakeAbsolute FsPath where
+    makeAbsolute (FsPath p) = mkPathNative <$> toAbsoluteFilePath p
+
+instance FsRoot root => MakeAbsolute (Path root) where
+    makeAbsolute p = makeAbsolute (FsPath p)
 
 -- | Export absolute path to a native 'FilePath'.
 --

@@ -61,8 +61,8 @@ module System.Path (
     -- ** Conversions
   , toFilePath
   , fromFilePath
-  , makeAbsolute
   , fromAbsoluteFilePath
+  , MakeAbsolute (..)
 {-
     -- * Wrappers around Codec.Archive.Tar
   , Tar
