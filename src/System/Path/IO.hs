@@ -46,7 +46,7 @@ module System.Path.IO
   , getModificationTime
   , removeFile
   , getTemporaryDirectory
-  , getDirectoryContents
+  , listDirectory
   , getRecursiveContents
   , renameFile
   , getCurrentDirectory
@@ -297,8 +297,8 @@ getTemporaryDirectory = fromAbsoluteFilePath <$> Dir.getTemporaryDirectory
 -- | Return the immediate children of a directory
 --
 -- Filters out @"."@ and @".."@.
-getDirectoryContents :: FsRoot root => Path root -> IO [Path Unrooted]
-getDirectoryContents path = do
+listDirectory :: FsRoot root => Path root -> IO [Path Unrooted]
+listDirectory path = do
     filePath <- toAbsoluteFilePath path
     fragments' <$> Dir.getDirectoryContents filePath
   where
@@ -321,7 +321,7 @@ getRecursiveContents root = go emptyPath
   where
     go :: Path Unrooted -> IO [Path Unrooted]
     go subdir = unsafeInterleaveIO $ do
-      entries <- getDirectoryContents (root </> subdir)
+      entries <- listDirectory (root </> subdir)
       liftM concat $ forM entries $ \entry -> do
         let path = subdir </> entry
         isDirectory <- doesDirectoryExist (root </> path)
