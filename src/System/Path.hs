@@ -53,6 +53,11 @@ module System.Path (
   , Absolute
   , HomeDir
 
+    -- ** XDG roots
+  , XdgData
+  , XdgConfig
+  , XdgCache
+
     -- ** Conversions
   , toFilePath
   , fromFilePath

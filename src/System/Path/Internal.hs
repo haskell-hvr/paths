@@ -46,6 +46,10 @@ module System.Path.Internal (
   , Relative
   , Absolute
   , HomeDir
+    -- ** XDG roots
+  , XdgData
+  , XdgConfig
+  , XdgCache
     -- ** Conversions
   , toFilePath
   , fromFilePath
@@ -71,7 +75,7 @@ import qualified System.Directory            as Dir
 import qualified System.FilePath             as FP.Native
 import qualified System.FilePath.Posix       as FP.Posix
 
-import           System.Path.Internal.Compat
+import           System.Path.Internal.Compat as Compat
 import           System.Path.Internal.Native
 import           System.Path.Internal.Typeable
 
@@ -422,6 +426,27 @@ instance Show FsPath where
 
 instance NFData FsPath where
     rnf (FsPath a) = rnf a
+
+{-------------------------------------------------------------------------------
+  XDG roots
+-------------------------------------------------------------------------------}
+
+-- | For data files (e.g. images).
+data XdgData deriving Typeable
+
+-- | For configuration files.
+data XdgConfig deriving Typeable
+
+-- | For non-essential files (e.g. cache).
+data XdgCache deriving Typeable
+
+instance FsRoot XdgData   where toAbsoluteFilePath p = Compat.getXdgDirectory Compat.XdgData   (unPathNative p)
+instance FsRoot XdgConfig where toAbsoluteFilePath p = Compat.getXdgDirectory Compat.XdgConfig (unPathNative p)
+instance FsRoot XdgCache  where toAbsoluteFilePath p = Compat.getXdgDirectory Compat.XdgCache  (unPathNative p)
+
+instance FsUniqueRoot XdgData   where basePath = Path ""
+instance FsUniqueRoot XdgConfig where basePath = Path ""
+instance FsUniqueRoot XdgCache  where basePath = Path ""
 
 {-------------------------------------------------------------------------------
   Conversions

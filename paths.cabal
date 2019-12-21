@@ -86,6 +86,9 @@ library
 
   ghc-options:         -Wall
 
+  if os(windows)
+    build-depends:     Win32 >=2.3.0.0 && <2.9
+
 source-repository head
   location: https://github.com/hvr/paths.git
   type: git
