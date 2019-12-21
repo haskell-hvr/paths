@@ -40,6 +40,7 @@ module System.Path.Internal (
 --  , isPathPrefixOf
     -- * File-system paths
   , FsRoot(toAbsoluteFilePath)
+  , FsUniqueRoot(..)
   , FsPath(..)
   , CWD
   , Relative
@@ -357,6 +358,15 @@ class FsRoot root where
   default rootName :: Typeable root => Proxy root -> String
   rootName = show . typeRep
 
+-- | A file system root with a unique root.
+--
+-- For example 'Absolute' isn't 'FsUniqueRoot' on Windows,
+-- as there are multiple drives.
+--
+class FsRoot root => FsUniqueRoot root where
+  -- | Path representing the base path
+  basePath :: Path root
+
 -- proxy for rootName
 data Proxy a = Proxy
 
@@ -370,6 +380,20 @@ instance FsRoot HomeDir where
     toAbsoluteFilePath p = do
       home <- Dir.getHomeDirectory
       return $ home FP.Native.</> unPathNative p
+
+-- |
+--
+-- >>> basePath </> fromUnrootedFilePath "here" </> fromUnrootedFilePath "there" :: Path CWD
+-- Path "here/there"
+instance FsUniqueRoot CWD where
+    basePath = Path ""
+
+-- |
+--
+-- >>> basePath </> fromUnrootedFilePath "here" </> fromUnrootedFilePath "there" :: Path HomeDir
+-- Path "here/there"
+instance FsUniqueRoot HomeDir where
+    basePath = Path ""
 
 -- | Abstract over a file system root
 --

@@ -46,6 +46,7 @@ module System.Path (
 
     -- * File-system paths
   , FsRoot(..)
+  , FsUniqueRoot (..)
   , FsPath(..)
   , CWD
   , Relative
