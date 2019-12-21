@@ -22,6 +22,16 @@ build-type:          Simple
 
 extra-source-files:  ChangeLog.md
 
+tested-with:         GHC == 7.4.2
+                      || == 7.6.3
+                      || == 7.8.4
+                      || == 7.10.3
+                      || == 8.0.2
+                      || == 8.2.2
+                      || == 8.4.4
+                      || == 8.6.5
+                      || == 8.8.1
+
 Flag directory--LT-1_2
   description: [directory](https://hackage.haskell.org/package/directory) < 1.2
   manual:      False
