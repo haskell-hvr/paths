@@ -38,7 +38,7 @@ for:
         - platform: x86
     environment:
       global:
-        GHCOPTS: --forcex86
+        CHOCOPTS: --forcex86
 
 install:
  - choco source add -n mistuke -s https://www.myget.org/F/mistuke/api/v2
