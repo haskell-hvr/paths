@@ -46,17 +46,23 @@ module System.Path (
 
     -- * File-system paths
   , FsRoot(..)
+  , FsUniqueRoot (..)
   , FsPath(..)
   , CWD
   , Relative
   , Absolute
   , HomeDir
 
+    -- ** XDG roots
+  , XdgData
+  , XdgConfig
+  , XdgCache
+
     -- ** Conversions
   , toFilePath
   , fromFilePath
-  , makeAbsolute
   , fromAbsoluteFilePath
+  , MakeAbsolute (..)
 {-
     -- * Wrappers around Codec.Archive.Tar
   , Tar

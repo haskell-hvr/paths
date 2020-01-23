@@ -1,5 +1,8 @@
+{-# LANGUAGE DefaultSignatures         #-}
+{-# LANGUAGE DeriveDataTypeable        #-}
 {-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE Safe                      #-}
+{-# LANGUAGE ScopedTypeVariables       #-}
 
 module System.Path.Internal (
     -- * Paths
@@ -36,16 +39,21 @@ module System.Path.Internal (
   , splitFragments
 --  , isPathPrefixOf
     -- * File-system paths
-  , FsRoot(..)
+  , FsRoot(toAbsoluteFilePath)
+  , FsUniqueRoot(..)
   , FsPath(..)
   , CWD
   , Relative
   , Absolute
   , HomeDir
+    -- ** XDG roots
+  , XdgData
+  , XdgConfig
+  , XdgCache
     -- ** Conversions
   , toFilePath
   , fromFilePath
-  , makeAbsolute
+  , MakeAbsolute (..)
   , fromAbsoluteFilePath
 {-
     -- * Wrappers around Codec.Archive.Tar
@@ -67,8 +75,9 @@ import qualified System.Directory            as Dir
 import qualified System.FilePath             as FP.Native
 import qualified System.FilePath.Posix       as FP.Posix
 
-import           System.Path.Internal.Compat
+import           System.Path.Internal.Compat as Compat
 import           System.Path.Internal.Native
+import           System.Path.Internal.Typeable
 
 {-------------------------------------------------------------------------------
   Paths
@@ -85,7 +94,7 @@ import           System.Path.Internal.Native
 -- an unrooted path to another path. It also means we avoid bugs where we use
 -- one kind of path where we expect another.
 newtype Path a = Path FilePath -- always a Posix style path internally
-               deriving (Show, Eq, Ord)
+               deriving (Show, Eq, Ord, Typeable)
 
 instance NFData (Path a) where
     rnf (Path p) = rnf p
@@ -116,7 +125,7 @@ unPathPosix (Path fp) = fp
 --
 -- @since 0.2.0.0
 newtype FileExt = FileExt String
-                deriving (Show, Eq, Ord)
+                deriving (Show, Eq, Ord, Typeable)
 
 infixr 7  <.>, -<.>
 
@@ -207,7 +216,7 @@ normalise = liftFP FP.Posix.normalise
 -- | Type-level tag for unrooted paths
 --
 -- Unrooted paths need a root before they can be interpreted.
-data Unrooted
+data Unrooted deriving Typeable
 
 -- instance Pretty (Path Unrooted) where
 --   pretty (Path fp) = fp
@@ -321,13 +330,13 @@ type Relative = CWD
 -- | 'Path' tag for paths /rooted/ at the /current working directory/
 --
 -- @since 0.2.0.0
-data CWD
+data CWD deriving Typeable
 
 -- | 'Path' tag for absolute paths
-data Absolute
+data Absolute deriving Typeable
 
 -- | 'Path' tag for paths /rooted/ at @$HOME@
-data HomeDir
+data HomeDir deriving Typeable
 
 -- instance Pretty (Path Absolute) where
 --   pretty (Path fp) = fp
@@ -348,6 +357,23 @@ class FsRoot root where
   -- See also 'makeAbsolute'
   toAbsoluteFilePath :: Path root -> IO FilePath
 
+  -- this member is hidden, but should be derivable for any type
+  rootName :: Proxy root -> String
+  default rootName :: Typeable root => Proxy root -> String
+  rootName = show . typeRep
+
+-- | A file system root with a unique root.
+--
+-- For example 'Absolute' isn't 'FsUniqueRoot' on Windows,
+-- as there are multiple drives.
+--
+class FsRoot root => FsUniqueRoot root where
+  -- | Path representing the base path
+  basePath :: Path root
+
+-- proxy for rootName
+data Proxy a = Proxy
+
 instance FsRoot CWD where
     toAbsoluteFilePath p = dirMakeAbsolute (unPathNative p)
 
@@ -359,13 +385,68 @@ instance FsRoot HomeDir where
       home <- Dir.getHomeDirectory
       return $ home FP.Native.</> unPathNative p
 
+-- |
+--
+-- >>> basePath </> fromUnrootedFilePath "here" </> fromUnrootedFilePath "there" :: Path CWD
+-- Path "here/there"
+instance FsUniqueRoot CWD where
+    basePath = Path ""
+
+-- |
+--
+-- >>> basePath </> fromUnrootedFilePath "here" </> fromUnrootedFilePath "there" :: Path HomeDir
+-- Path "here/there"
+instance FsUniqueRoot HomeDir where
+    basePath = Path ""
+
 -- | Abstract over a file system root
 --
 -- 'FsPath' can be constructed directly or via 'fromFilePath' or 'System.Path.QQ.fspath'.
+--
+-- >>> fromFilePath "/dev/null"
+-- FsRoot @Absolute (Path "/dev/null")
+--
+-- >>> fromFilePath "foo/bar"
+-- FsRoot @CWD (Path "foo/bar")
+--
+-- >>> fromFilePath "~/.foo"
+-- FsRoot @HomeDir (Path ".foo")
+--
 data FsPath = forall root. FsRoot root => FsPath (Path root)
+            deriving Typeable
+
+instance Show FsPath where
+    showsPrec d (FsPath path) = f path where
+        f :: forall root. FsRoot root => Path root -> ShowS
+        f p = showParen (d > 10)
+            $ showString "FsRoot @"
+            . showString (rootName (Proxy :: Proxy root))
+            . showChar ' '
+            . showsPrec 11 p
 
 instance NFData FsPath where
     rnf (FsPath a) = rnf a
+
+{-------------------------------------------------------------------------------
+  XDG roots
+-------------------------------------------------------------------------------}
+
+-- | For data files (e.g. images).
+data XdgData deriving Typeable
+
+-- | For configuration files.
+data XdgConfig deriving Typeable
+
+-- | For non-essential files (e.g. cache).
+data XdgCache deriving Typeable
+
+instance FsRoot XdgData   where toAbsoluteFilePath p = Compat.getXdgDirectory Compat.XdgData   (unPathNative p)
+instance FsRoot XdgConfig where toAbsoluteFilePath p = Compat.getXdgDirectory Compat.XdgConfig (unPathNative p)
+instance FsRoot XdgCache  where toAbsoluteFilePath p = Compat.getXdgDirectory Compat.XdgCache  (unPathNative p)
+
+instance FsUniqueRoot XdgData   where basePath = Path ""
+instance FsUniqueRoot XdgConfig where basePath = Path ""
+instance FsUniqueRoot XdgCache  where basePath = Path ""
 
 {-------------------------------------------------------------------------------
   Conversions
@@ -390,11 +471,17 @@ fromFilePath fp
     atHome ('~':sep:fp') | FP.Native.isPathSeparator sep = Just fp'
     atHome _otherwise    = Nothing
 
--- | Export filesystem path to an absolute 'Path'
---
--- See also 'toAbsoluteFilePath'
-makeAbsolute :: FsPath -> IO (Path Absolute)
-makeAbsolute (FsPath p) = mkPathNative <$> toAbsoluteFilePath p
+class MakeAbsolute path where
+    -- | Export some path to an absolute 'Path'
+    --
+    -- See also 'toAbsoluteFilePath'
+    makeAbsolute :: path -> IO (Path Absolute)
+
+instance MakeAbsolute FsPath where
+    makeAbsolute (FsPath p) = mkPathNative <$> toAbsoluteFilePath p
+
+instance FsRoot root => MakeAbsolute (Path root) where
+    makeAbsolute p = makeAbsolute (FsPath p)
 
 -- | Export absolute path to a native 'FilePath'.
 --
