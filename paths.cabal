@@ -42,6 +42,10 @@ library
   exposed-modules:     System.Path
                        System.Path.Lens
                        System.Path.IO
+                       System.Path.IO.ByteString
+                       System.Path.IO.Directory
+                       System.Path.IO.Handle
+                       System.Path.IO.Text
                        System.Path.QQ
                        System.Path.Unsafe
   other-modules:       System.Path.Internal
