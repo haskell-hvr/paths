@@ -1,7 +1,7 @@
 {-# LANGUAGE DefaultSignatures         #-}
 {-# LANGUAGE DeriveDataTypeable        #-}
 {-# LANGUAGE ExistentialQuantification #-}
-{-# LANGUAGE Safe                      #-}
+{-# LANGUAGE Trustworthy               #-}
 {-# LANGUAGE ScopedTypeVariables       #-}
 
 module System.Path.Internal (
