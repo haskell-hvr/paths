@@ -1,5 +1,5 @@
 {-# LANGUAGE CPP  #-}
-{-# LANGUAGE Safe #-}
+{-# LANGUAGE Trustworthy #-}
 
 {-# OPTIONS_GHC -fno-warn-unused-imports #-}
 
